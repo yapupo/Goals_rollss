@@ -14,25 +14,61 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          code: string
+          description: string | null
+          icon: string | null
+          id: string
+          title: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          title: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          title?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          cinnamon_outfit: string
           created_at: string
           display_name: string | null
+          has_onboarded: boolean
           id: string
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          cinnamon_outfit?: string
           created_at?: string
           display_name?: string | null
+          has_onboarded?: boolean
           id: string
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          cinnamon_outfit?: string
           created_at?: string
           display_name?: string | null
+          has_onboarded?: boolean
           id?: string
           updated_at?: string
         }
@@ -40,6 +76,7 @@ export type Database = {
       }
       tasks: {
         Row: {
+          category: Database["public"]["Enums"]["task_category"]
           created_at: string
           description: string | null
           due_date: string | null
@@ -51,6 +88,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: Database["public"]["Enums"]["task_category"]
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -62,6 +100,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: Database["public"]["Enums"]["task_category"]
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -82,6 +121,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      task_category: "work" | "study" | "personal" | "other"
       task_priority: "low" | "medium" | "high"
     }
     CompositeTypes: {
@@ -210,6 +250,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      task_category: ["work", "study", "personal", "other"],
       task_priority: ["low", "medium", "high"],
     },
   },
