@@ -25,7 +25,7 @@ const allDone = [
 ];
 
 const pick = (arr: string[], name: string) =>
-  arr[Math.floor(Math.random() * arr.length)].replaceAll("{name}", name || "amigo(a)");
+  arr[Math.floor(Math.random() * arr.length)].split("{name}").join(name || "amigo(a)");
 
 export function cinnamonQuote(name: string, activeCount: number, totalCount: number) {
   if (totalCount === 0) return pick(empty, name);
