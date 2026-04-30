@@ -39,9 +39,16 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
-        highlight: {
-          DEFAULT: "hsl(var(--highlight))",
-          foreground: "hsl(var(--highlight-foreground))",
+        pink: {
+          DEFAULT: "hsl(var(--pink))",
+          foreground: "hsl(var(--pink-foreground))",
+          soft: "hsl(var(--pink-soft))",
+        },
+        cat: {
+          work: "hsl(var(--cat-work))",
+          study: "hsl(var(--cat-study))",
+          personal: "hsl(var(--cat-personal))",
+          other: "hsl(var(--cat-other))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
