@@ -6,7 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { AddTaskForm } from "@/components/flow/AddTaskForm";
 import { TaskItem } from "@/components/flow/TaskItem";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ListTodo, CheckCircle2, Sparkles } from "lucide-react";
+import { Loader2, ListTodo, CheckCircle2, Sparkles, Flame } from "lucide-react";
 import { toast } from "sonner";
 import { Mascot } from "@/components/cinnamon/Mascot";
 import { SpeechBubble } from "@/components/cinnamon/SpeechBubble";
@@ -14,6 +14,7 @@ import { AppHeader } from "@/components/cinnamon/AppHeader";
 import { cinnamonGreeting, cinnamonQuote } from "@/lib/cinnamon-quotes";
 import { checkAchievementsAfterDone } from "@/lib/achievements";
 import { CATEGORIES, Category } from "@/lib/categories";
+import { calcStreak } from "@/lib/streak";
 
 type Task = Tables<"tasks">;
 type Profile = Tables<"profiles">;
@@ -88,6 +89,8 @@ export default function Dashboard() {
     return { total, done, active: total - done, pct: total ? Math.round((done / total) * 100) : 0 };
   }, [tasks]);
 
+  const streak = useMemo(() => calcStreak(tasks), [tasks]);
+
   if (loading || !user || fetching) {
     return <main className="min-h-screen flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-primary" /></main>;
   }
@@ -107,10 +110,16 @@ export default function Dashboard() {
           </SpeechBubble>
         </section>
 
-        <section className="grid grid-cols-3 gap-3">
+        <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatCard icon={<ListTodo className="w-4 h-4" />} label="Total" value={stats.total} />
           <StatCard icon={<Sparkles className="w-4 h-4" />} label="Ativas" value={stats.active} />
           <StatCard icon={<CheckCircle2 className="w-4 h-4" />} label="Feitas" value={`${stats.pct}%`} />
+          <StatCard
+            icon={<Flame className={`w-4 h-4 ${streak > 0 ? "text-pink-foreground" : ""}`} />}
+            label="Sequência"
+            value={streak > 0 ? `${streak}d 🔥` : "—"}
+            highlight={streak > 0}
+          />
         </section>
 
         <AddTaskForm onAdd={addTask} />
@@ -146,9 +155,9 @@ export default function Dashboard() {
   );
 }
 
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
+function StatCard({ icon, label, value, highlight }: { icon: React.ReactNode; label: string; value: number | string; highlight?: boolean }) {
   return (
-    <div className="rounded-3xl p-4 bg-white shadow-soft border border-border">
+    <div className={`rounded-3xl p-4 shadow-soft border ${highlight ? "bg-gradient-pink border-pink-soft" : "bg-white border-border"}`}>
       <div className="flex items-center gap-1.5 text-muted-foreground text-xs">{icon}<span>{label}</span></div>
       <div className="text-2xl font-bold mt-1">{value}</div>
     </div>
