@@ -1,4 +1,4 @@
-export type ThemeKey = "cinnamoroll" | "mymelody" | "kuromi" | "pompompurin";
+export type ThemeKey = "cinnamoroll" | "mymelody" | "kuromi" | "pompompurin" | "keroppi";
 
 export interface ThemeDef {
   key: ThemeKey;
@@ -82,6 +82,22 @@ export const THEMES: Record<ThemeKey, ThemeDef> = {
       ring: "40 90% 65%",
       radial1: "45 100% 92%",
       radial2: "30 100% 94%",
+    },
+  },
+  keroppi: {
+    key: "keroppi",
+    name: "Keroppi",
+    emoji: "🐸",
+    description: "Verdinho lago, fresquinho como folha de vitória-régia.",
+    vars: {
+      background: "140 60% 96%",
+      primary: "145 55% 60%",
+      primarySoft: "140 70% 90%",
+      accent: "90 70% 85%",
+      pink: "350 80% 85%",
+      ring: "145 55% 60%",
+      radial1: "140 70% 92%",
+      radial2: "90 80% 94%",
     },
   },
 };
