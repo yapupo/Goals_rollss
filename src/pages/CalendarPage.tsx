@@ -4,8 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
 import { Calendar } from "@/components/ui/calendar";
-import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle2, Clock, Sparkles } from "lucide-react";
 import { AppHeader } from "@/components/cinnamon/AppHeader";
 import { Mascot } from "@/components/cinnamon/Mascot";
 import { SpeechBubble } from "@/components/cinnamon/SpeechBubble";
@@ -54,7 +53,32 @@ export default function CalendarPage() {
 
   const selectedKey = toIso(date);
   const selectedTasks = dayMap.get(selectedKey) ?? [];
-  const datesWithTasks = useMemo(() => Array.from(dayMap.keys()).map((k) => new Date(k + "T00:00:00")), [dayMap]);
+
+  const { pendingDates, doneDates, overdueDates } = useMemo(() => {
+    const pending: Date[] = [];
+    const done: Date[] = [];
+    const overdue: Date[] = [];
+    const todayKey = toIso(new Date());
+    for (const [k, list] of dayMap.entries()) {
+      const allDone = list.every((t) => t.is_done);
+      const d = new Date(k + "T00:00:00");
+      if (allDone) done.push(d);
+      else if (k < todayKey) overdue.push(d);
+      else pending.push(d);
+    }
+    return { pendingDates: pending, doneDates: done, overdueDates: overdue };
+  }, [dayMap]);
+
+  const monthSummary = useMemo(() => {
+    const y = date.getFullYear(), m = date.getMonth();
+    const inMonth = tasks.filter((t) => {
+      if (!t.due_date) return false;
+      const d = new Date(t.due_date + "T00:00:00");
+      return d.getFullYear() === y && d.getMonth() === m;
+    });
+    const done = inMonth.filter((t) => t.is_done).length;
+    return { total: inMonth.length, done, pct: inMonth.length ? Math.round((done / inMonth.length) * 100) : 0 };
+  }, [tasks, date]);
 
   const addTask = async ({ title, priority, due_date, category }: { title: string; priority: Task["priority"]; due_date: string | null; category: Category }) => {
     if (!user) return;
@@ -82,6 +106,8 @@ export default function CalendarPage() {
 
   if (loading || !user || fetching) return <main className="min-h-screen flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-primary" /></main>;
 
+  const isToday = toIso(new Date()) === selectedKey;
+
   return (
     <main className="min-h-screen">
       <AppHeader profile={profile} />
@@ -90,28 +116,55 @@ export default function CalendarPage() {
           <Mascot mood="think" size={100} />
           <SpeechBubble className="flex-1 mb-2">
             Vamos ver seus prazos? Toque num diazinho pra ver as tarefas dele 📅
+            <br/><span className="text-xs text-muted-foreground">Este mês: {monthSummary.done}/{monthSummary.total} concluídas ({monthSummary.pct}%)</span>
           </SpeechBubble>
         </div>
 
-        <Card className="bg-white border border-border rounded-3xl shadow-cloud p-2 sm:p-4 flex justify-center">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={(d) => d && setDate(d)}
-            locale={ptBR}
-            modifiers={{ hasTask: datesWithTasks }}
-            modifiersClassNames={{ hasTask: "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:rounded-full after:bg-primary" }}
-            className="p-3 pointer-events-auto"
-          />
-        </Card>
+        <div className="bg-gradient-cloud border-2 border-primary-soft rounded-3xl shadow-cloud p-3 sm:p-5 relative overflow-hidden">
+          <div className="absolute -top-4 -right-4 text-6xl opacity-20 pointer-events-none select-none">☁️</div>
+          <div className="absolute -bottom-6 -left-2 text-5xl opacity-20 pointer-events-none select-none">☁️</div>
+          <div className="relative flex justify-center">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={(d) => d && setDate(d)}
+              locale={ptBR}
+              modifiers={{ pending: pendingDates, doneDay: doneDates, overdue: overdueDates }}
+              modifiersClassNames={{
+                pending: "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:rounded-full after:bg-primary",
+                doneDay: "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:rounded-full after:bg-[hsl(var(--cat-other))]",
+                overdue: "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:rounded-full after:bg-destructive",
+              }}
+              className="p-3 pointer-events-auto [&_.rdp-day_selected]:shadow-pop"
+            />
+          </div>
+          <div className="relative flex flex-wrap justify-center gap-3 mt-3 pt-3 border-t border-primary-soft text-xs">
+            <Legend color="bg-primary" label="Pendente" />
+            <Legend color="bg-[hsl(var(--cat-other))]" label="Concluída" />
+            <Legend color="bg-destructive" label="Atrasada" />
+          </div>
+        </div>
 
         <section className="space-y-3">
-          <h2 className="font-bold text-lg">
-            {date.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
-          </h2>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h2 className="font-bold text-lg flex items-center gap-2">
+              {isToday && <span className="text-xs px-2 py-0.5 rounded-full bg-pink-soft text-pink-foreground font-bold">Hoje</span>}
+              <span className="capitalize">{date.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</span>
+            </h2>
+            {selectedTasks.length > 0 && (
+              <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" />
+                {selectedTasks.filter((t) => t.is_done).length}/{selectedTasks.length}
+              </span>
+            )}
+          </div>
           <AddTaskForm onAdd={addTask} defaultDate={selectedKey} />
           {selectedTasks.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">Sem tarefas neste dia ☁️</p>
+            <div className="text-center py-8 flex flex-col items-center gap-2 text-muted-foreground">
+              <Sparkles className="w-5 h-5 text-primary/60" />
+              <p className="text-sm">Sem tarefas neste dia ☁️</p>
+              <p className="text-xs">Adicione uma metinha pra esse dia acima!</p>
+            </div>
           ) : (
             <div className="space-y-2">
               {selectedTasks.map((t) => <TaskItem key={t.id} task={t} onToggle={toggleTask} onDelete={deleteTask} />)}
@@ -120,5 +173,14 @@ export default function CalendarPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+      <span className={`w-2 h-2 rounded-full ${color}`} />
+      {label}
+    </span>
   );
 }
