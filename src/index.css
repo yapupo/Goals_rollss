@@ -76,6 +76,10 @@
     --sidebar-accent-foreground: 215 50% 35%;
     --sidebar-border: 210 60% 92%;
     --sidebar-ring: 205 85% 70%;
+
+    /* Background radial blobs (overridable per theme) */
+    --radial-1: 205 100% 95%;
+    --radial-2: 340 100% 96%;
   }
 
   /* Dark mode kept gentle in case shadcn forces it */
@@ -108,8 +112,8 @@
     @apply bg-background text-foreground antialiased;
     font-family: 'Quicksand', system-ui, -apple-system, sans-serif;
     background-image:
-      radial-gradient(at 10% 0%, hsl(205 100% 95%) 0px, transparent 55%),
-      radial-gradient(at 90% 100%, hsl(340 100% 96%) 0px, transparent 55%);
+      radial-gradient(at 10% 0%, hsl(var(--radial-1)) 0px, transparent 55%),
+      radial-gradient(at 90% 100%, hsl(var(--radial-2)) 0px, transparent 55%);
     background-attachment: fixed;
   }
   h1, h2, h3, h4 {
