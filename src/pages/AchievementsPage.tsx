@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
@@ -32,6 +32,7 @@ export default function AchievementsPage() {
 
   const unlockedCodes = new Set(unlocked.map((u) => u.code));
   const all = Object.entries(ACHIEVEMENT_DEFS) as [AchievementCode, typeof ACHIEVEMENT_DEFS[AchievementCode]][];
+  const customizeUnlocked = unlockedCodes.has("perfect_week");
 
   return (
     <main className="min-h-screen">
@@ -43,6 +44,25 @@ export default function AchievementsPage() {
             Olha quantas conquistas! Você já desbloqueou {unlocked.length} de {all.length} 🤍
           </SpeechBubble>
         </div>
+
+        <Link
+          to="/customize"
+          className={`block rounded-3xl p-4 border-2 transition-bounce ${customizeUnlocked ? "bg-gradient-pink border-pink shadow-cloud hover:scale-[1.01]" : "bg-secondary/40 border-border"}`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="text-3xl">{customizeUnlocked ? "🎀" : "🔒"}</div>
+            <div className="flex-1">
+              <p className="font-bold text-sm">
+                {customizeUnlocked ? "Personalização desbloqueada!" : "Personalização do tema"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {customizeUnlocked
+                  ? "Escolha um amiguinho do mundo Hello Kitty pra deixar tudo com a sua cara."
+                  : "Conclua todas as suas metas durante uma semana pra desbloquear novos temas!"}
+              </p>
+            </div>
+          </div>
+        </Link>
 
         <div className="grid sm:grid-cols-2 gap-3">
           {all.map(([code, def]) => {
