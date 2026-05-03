@@ -51,6 +51,26 @@ export const ACHIEVEMENT_DEFS = {
     description: "Concluiu uma tarefa no mesmo dia do prazo. Organizada!",
     icon: "⏰",
   },
+  twenty_tasks: {
+    title: "Vinte vitórias! 🏆",
+    description: "20 tarefas concluídas. Você é uma máquina de fofura produtiva!",
+    icon: "🏆",
+  },
+  master_supreme: {
+    title: "Mestre Supremo 👑",
+    description: "50 tarefas concluídas. Cinnamoroll te coroou rainha do foco!",
+    icon: "👑",
+  },
+  marathoner: {
+    title: "Maratonista 🏃‍♀️",
+    description: "10 sessões de Pomodoro concluídas. Fôlego de campeã!",
+    icon: "🏃‍♀️",
+  },
+  iron_focus: {
+    title: "Foco de Aço 🛡️",
+    description: "4 Pomodoros seguidos sem pular o break. Disciplina pura!",
+    icon: "🛡️",
+  },
 } as const;
 
 export type AchievementCode = keyof typeof ACHIEVEMENT_DEFS;
@@ -77,6 +97,8 @@ export async function checkAchievementsAfterDone(userId: string, allTasks: Task[
   if (doneCount === 1) await unlock(userId, "first_task");
   if (doneCount === 5) await unlock(userId, "five_tasks");
   if (doneCount === 10) await unlock(userId, "ten_tasks");
+  if (doneCount === 20) await unlock(userId, "twenty_tasks");
+  if (doneCount === 50) await unlock(userId, "master_supreme");
 
   // hora do dia
   const hour = new Date().getHours();
@@ -112,4 +134,8 @@ export async function checkAchievementsAfterDone(userId: string, allTasks: Task[
   if (weekTasks.length >= 3 && weekTasks.every((t) => t.is_done)) {
     await unlock(userId, "perfect_week");
   }
+}
+
+export async function unlockAchievement(userId: string, code: AchievementCode) {
+  return unlock(userId, code);
 }
