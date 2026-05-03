@@ -7,7 +7,8 @@ import { AppHeader } from "@/components/cinnamon/AppHeader";
 import { Mascot } from "@/components/cinnamon/Mascot";
 import { SpeechBubble } from "@/components/cinnamon/SpeechBubble";
 import { ACHIEVEMENT_DEFS, AchievementCode } from "@/lib/achievements";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2, Lock, BookOpen, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function AchievementsPage() {
   const { user, loading } = useAuth();
@@ -15,6 +16,7 @@ export default function AchievementsPage() {
   const [unlocked, setUnlocked] = useState<Tables<"achievements">[]>([]);
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const [fetching, setFetching] = useState(true);
+  const [showLocked, setShowLocked] = useState(false);
 
   useEffect(() => { if (!loading && !user) navigate("/auth", { replace: true }); }, [user, loading, navigate]);
   useEffect(() => {
@@ -33,6 +35,8 @@ export default function AchievementsPage() {
   const unlockedCodes = new Set(unlocked.map((u) => u.code));
   const all = Object.entries(ACHIEVEMENT_DEFS) as [AchievementCode, typeof ACHIEVEMENT_DEFS[AchievementCode]][];
   const customizeUnlocked = unlockedCodes.has("perfect_week");
+  const unlockedList = all.filter(([code]) => unlockedCodes.has(code));
+  const lockedList = all.filter(([code]) => !unlockedCodes.has(code));
 
   return (
     <main className="min-h-screen">
@@ -64,23 +68,54 @@ export default function AchievementsPage() {
           </div>
         </Link>
 
-        <div className="grid sm:grid-cols-2 gap-3">
-          {all.map(([code, def]) => {
-            const got = unlockedCodes.has(code);
-            return (
-              <div key={code} className={`rounded-3xl p-5 border transition-bounce ${got ? "bg-white border-border shadow-cloud" : "bg-secondary/40 border-border opacity-70"}`}>
-                <div className="flex items-start gap-3">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl ${got ? "bg-pink-soft" : "bg-muted"}`}>
-                    {got ? def.icon : <Lock className="w-5 h-5 text-muted-foreground" />}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-sm">{def.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{def.description}</p>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold text-sm text-muted-foreground uppercase tracking-wide">Suas conquistas ({unlockedList.length})</h2>
+            <Button variant="outline" size="sm" onClick={() => setShowLocked((v) => !v)} className="rounded-full text-xs gap-1.5">
+              {showLocked ? <><EyeOff className="w-3.5 h-3.5" /> Esconder bloqueadas</> : <><BookOpen className="w-3.5 h-3.5" /> Ver bloqueadas ({lockedList.length})</>}
+            </Button>
+          </div>
+
+          {unlockedList.length === 0 ? (
+            <div className="rounded-3xl p-8 bg-white/60 border border-dashed border-border text-center text-sm text-muted-foreground">
+              Nada desbloqueado ainda. Conclua tarefas pra começar a colecionar 🍬
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {unlockedList.map(([code, def]) => (
+                <div key={code} className="rounded-3xl p-5 border bg-white border-border shadow-cloud transition-bounce hover:-translate-y-0.5">
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-pink-soft">{def.icon}</div>
+                    <div className="flex-1">
+                      <p className="font-bold text-sm">{def.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{def.description}</p>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
+
+          {showLocked && (
+            <div className="space-y-2 animate-pop-in">
+              <h2 className="font-bold text-sm text-muted-foreground uppercase tracking-wide pt-2">Bloqueadas</h2>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {lockedList.map(([code, def]) => (
+                  <div key={code} className="rounded-3xl p-5 border bg-secondary/40 border-border opacity-70">
+                    <div className="flex items-start gap-3">
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-muted">
+                        <Lock className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-sm">???</p>
+                        <p className="text-xs text-muted-foreground mt-1">{def.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            );
-          })}
+            </div>
+          )}
         </div>
       </div>
     </main>

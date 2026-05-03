@@ -12,6 +12,7 @@ import Onboarding from "./pages/Onboarding.tsx";
 import CalendarPage from "./pages/CalendarPage.tsx";
 import AchievementsPage from "./pages/AchievementsPage.tsx";
 import CustomizePage from "./pages/CustomizePage.tsx";
+import FocusPage from "./pages/FocusPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/achievements" element={<AchievementsPage />} />
             <Route path="/customize" element={<CustomizePage />} />
+            <Route path="/focus" element={<FocusPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
