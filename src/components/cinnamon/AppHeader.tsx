@@ -1,7 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Home, LogOut, Sparkles, Trophy, Timer } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Calendar, Home, LogOut, Sparkles, Trophy, Timer, MoreHorizontal } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
@@ -18,13 +21,15 @@ export function AppHeader({ profile, minimal }: Props) {
     <Link to={to} className={cn(
       "inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-smooth",
       pathname === to ? "bg-primary text-primary-foreground shadow-soft" : "text-muted-foreground hover:bg-secondary"
-    )}>{icon}<span className="hidden sm:inline">{label}</span></Link>
+    )}>{icon}<span className="hidden md:inline">{label}</span></Link>
   );
+
+  const moreActive = pathname === "/achievements" || pathname === "/customize";
 
   return (
     <header className="bg-white/80 backdrop-blur border-b border-border sticky top-0 z-10">
-      <div className="container max-w-3xl flex items-center justify-between h-16 px-4">
-        <Link to="/dashboard" className="flex items-center gap-1.5">
+      <div className="container max-w-3xl flex items-center justify-between h-16 px-4 gap-2">
+        <Link to="/dashboard" className="flex items-center gap-1.5 shrink-0">
           <span className="text-2xl">☁️</span>
           <span className="font-bold text-lg hidden sm:inline">Goals Roll</span>
         </Link>
@@ -39,12 +44,28 @@ export function AppHeader({ profile, minimal }: Props) {
               <NavBtn to="/dashboard" icon={<Home className="w-4 h-4" />} label="Início" />
               <NavBtn to="/calendar" icon={<Calendar className="w-4 h-4" />} label="Calendário" />
               <NavBtn to="/focus" icon={<Timer className="w-4 h-4" />} label="Foco" />
-              <NavBtn to="/achievements" icon={<Trophy className="w-4 h-4" />} label="Conquistas" />
-              <NavBtn to="/customize" icon={<Sparkles className="w-4 h-4" />} label="Tema" />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-smooth",
+                    moreActive ? "bg-primary text-primary-foreground shadow-soft" : "text-muted-foreground hover:bg-secondary"
+                  )} aria-label="Mais">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="rounded-2xl">
+                  <DropdownMenuItem onClick={() => navigate("/achievements")} className="rounded-xl gap-2 cursor-pointer">
+                    <Trophy className="w-4 h-4" /> Conquistas
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/customize")} className="rounded-xl gap-2 cursor-pointer">
+                    <Sparkles className="w-4 h-4" /> Tema
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           )}
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <Avatar className="w-9 h-9 ring-2 ring-primary/30">
             <AvatarImage src={profile?.avatar_url ?? undefined} />
             <AvatarFallback className="bg-pink-soft text-pink-foreground text-xs font-bold">{initials}</AvatarFallback>
