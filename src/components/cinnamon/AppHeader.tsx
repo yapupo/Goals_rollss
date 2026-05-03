@@ -1,14 +1,14 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Home, LogOut, Sparkles, Trophy } from "lucide-react";
+import { Calendar, Home, LogOut, Sparkles, Trophy, Timer } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 
-interface Props { profile: Tables<"profiles"> | null }
+interface Props { profile: Tables<"profiles"> | null; minimal?: boolean }
 
-export function AppHeader({ profile }: Props) {
+export function AppHeader({ profile, minimal }: Props) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -29,10 +29,20 @@ export function AppHeader({ profile }: Props) {
           <span className="font-bold text-lg hidden sm:inline">Goals Roll</span>
         </Link>
         <nav className="flex items-center gap-1">
-          <NavBtn to="/dashboard" icon={<Home className="w-4 h-4" />} label="Início" />
-          <NavBtn to="/calendar" icon={<Calendar className="w-4 h-4" />} label="Calendário" />
-          <NavBtn to="/achievements" icon={<Trophy className="w-4 h-4" />} label="Conquistas" />
-          <NavBtn to="/customize" icon={<Sparkles className="w-4 h-4" />} label="Tema" />
+          {minimal ? (
+            <>
+              <NavBtn to="/focus" icon={<Timer className="w-4 h-4" />} label="Foco" />
+              <NavBtn to="/dashboard" icon={<Home className="w-4 h-4" />} label="Voltar" />
+            </>
+          ) : (
+            <>
+              <NavBtn to="/dashboard" icon={<Home className="w-4 h-4" />} label="Início" />
+              <NavBtn to="/calendar" icon={<Calendar className="w-4 h-4" />} label="Calendário" />
+              <NavBtn to="/focus" icon={<Timer className="w-4 h-4" />} label="Foco" />
+              <NavBtn to="/achievements" icon={<Trophy className="w-4 h-4" />} label="Conquistas" />
+              <NavBtn to="/customize" icon={<Sparkles className="w-4 h-4" />} label="Tema" />
+            </>
+          )}
         </nav>
         <div className="flex items-center gap-2">
           <Avatar className="w-9 h-9 ring-2 ring-primary/30">
