@@ -20,6 +20,7 @@ import { checkAchievementsAfterDone, unlockAchievement } from "@/lib/achievement
 import { categoryMeta } from "@/lib/categories";
 import {
   Loader2, Pause, Play, RotateCcw, Settings as SettingsIcon, SkipForward, Check, Target,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,8 @@ export default function FocusPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [fetching, setFetching] = useState(true);
+  const [newTitle, setNewTitle] = useState("");
+  const [adding, setAdding] = useState(false);
 
   const [settings, setSettings] = useState<PomodoroSettings>(DEFAULT_SETTINGS);
   const [mode, setMode] = useState<PomodoroMode>("focus");
@@ -161,6 +164,21 @@ export default function FocusPage() {
     }
   }
 
+  async function quickAdd(e: React.FormEvent) {
+    e.preventDefault();
+    const title = newTitle.trim();
+    if (!title || !user) return;
+    setAdding(true);
+    const { data, error } = await supabase.from("tasks")
+      .insert({ user_id: user.id, title, priority: "medium", category: "personal" })
+      .select().single();
+    setAdding(false);
+    if (error || !data) { toast.error("Não foi possível adicionar"); return; }
+    setTasks((curr) => [data, ...curr]);
+    setNewTitle("");
+    toast.success("Tarefa adicionada ☁️");
+  }
+
   if (loading || !user || fetching) {
     return <main className="min-h-screen flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-primary" /></main>;
   }
@@ -244,6 +262,18 @@ export default function FocusPage() {
           <h2 className="font-bold text-base flex items-center gap-2 mb-3">
             <Target className="w-4 h-4 text-primary" /> Tarefas ativas
           </h2>
+          <form onSubmit={quickAdd} className="flex gap-2 mb-3">
+            <Input
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="Nova tarefa rápida..."
+              maxLength={200}
+              className="h-10 rounded-xl text-sm bg-secondary/40"
+            />
+            <Button type="submit" size="icon" disabled={adding || !newTitle.trim()} className="h-10 w-10 rounded-xl shrink-0" aria-label="Adicionar">
+              <Plus className="w-4 h-4" />
+            </Button>
+          </form>
           {tasks.length === 0 ? (
             <p className="text-xs text-muted-foreground py-6 text-center">Nada por aqui ☁️<br/>Adicione tarefas no início.</p>
           ) : (
